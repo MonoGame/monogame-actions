@@ -31,15 +31,15 @@ jobs:
         uses: ./install-fonts
       - name: Setup Android
         uses: ./install-android-dependencies
-      - name: Publish Game to itch.io
-        uses: ./publish-itchio
-        with:
-          channel: ${{ matrix.channel }}
-          file: 'butler.zip'
-          version: '1.0.0'
-          ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
-          ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
-          ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
+      # - name: Publish Game to itch.io
+      #   uses: ./publish-itchio
+      #   with:
+      #     channel: ${{ matrix.channel }}
+      #     file: 'butler.zip'
+      #     version: '1.0.0'
+      #     ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
+      #     ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
+      #     ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
       - name: Test Dotnet is installed
         if: matrix.os != 'windows-latest'
         run: |
