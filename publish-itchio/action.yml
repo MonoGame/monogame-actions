@@ -40,15 +40,15 @@ runs:
     - name: Install butler
       run: |
             if [ "$RUNNER_OS" == "Linux" ]; then
-                  curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -o butler.zip
+                  curl -L https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
             elif [ "$RUNNER_OS" == "Windows" ]; then
-                  curl -L https://broth.itch.ovh/butler/windows-amd64/LATEST/archive/default -o butler.zip
+                  curl -L https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
             elif [ "$RUNNER_OS" == "macOS" ]; then
-                  curl -L https://broth.itch.ovh/butler/darwin-amd64/LATEST/archive/default -o butler.zip
+                  curl -L https://broth.itch.zone/butler/darwin-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
             fi
