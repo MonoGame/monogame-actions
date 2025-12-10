@@ -1,0 +1,304 @@
+name: "Build MonoGame Content"
+description: "Builds MonoGame content using the content builder console application"
+
+inputs:
+  content-builder-path:
+    description: 'Path to the content builder. For local: relative path from repo root (e.g., "./Content" or "./Content/Builder"). For remote repo: subfolder within cloned repo (e.g., "" for root, "MyBuilder", or "builders/desktop").'
+    required: false
+    default: "./CBPlatformTest/Content"
+
+  content-builder-repo:
+    description: "Optional owner/repo for content builder (e.g., owner/repo). If specified, repo is cloned and content-builder-path is used as subfolder within it. If not specified, content-builder-path is used as local path."
+    required: false
+    default: ""
+
+  assets-path:
+    description: 'Path to the assets. For local: relative path from repo root (e.g., "./Assets" or "./Content/Assets"). For remote repo: subfolder within cloned repo (e.g., "" for root, "mobile", or "projects/MyGame").'
+    required: false
+    default: "./Assets"
+
+  assets-repo:
+    description: "Optional owner/repo for assets (e.g., owner/repo). If specified, repo is cloned and assets-path is used as subfolder within it. If not specified, assets-path is used as local path."
+    required: false
+    default: ""
+
+  monogame-platform:
+    description: "MonoGame platform target (e.g., iOS, Android, DesktopGL, Windows)"
+    required: true
+
+  output-folder:
+    description: "Output folder for processed content (relative to repo root)"
+    required: true
+
+  additional-args:
+    description: 'Additional arguments to pass to the content builder (e.g., "--verbose")'
+    required: false
+    default: ""
+
+  upload-output:
+    description: "Whether to upload the content output as an artifact (true/false)"
+    required: false
+    default: "false"
+
+  configuration:
+    description: 'Build configuration'
+    required: false
+    default: 'Release'
+
+outputs:
+  output-folder:
+    description: "Full path to the output folder"
+    value: ${{ steps.content-build.outputs.output_folder }}
+
+  log-file:
+    description: "Full path to the build log file"
+    value: ${{ steps.content-build.outputs.log_file }}
+
+  success:
+    description: "Whether the content build succeeded"
+    value: ${{ steps.content-build.outputs.success }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup build directories
+      shell: pwsh
+      run: |
+        $OutputFolder = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) "${{ inputs.output-folder }}"))
+        # Use workspace root for temp and logs folders
+        $WorkspaceRoot = Get-Location
+        $TempFolder = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "build-temp"))
+        $LogsFolder = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "build-logs"))
+
+        # Create directories
+        New-Item -ItemType Directory -Path $OutputFolder -Force | Out-Null
+        New-Item -ItemType Directory -Path $TempFolder -Force | Out-Null
+        New-Item -ItemType Directory -Path $LogsFolder -Force | Out-Null
+
+        # Store paths for later steps
+        "OUTPUT_FOLDER=$OutputFolder" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "TEMP_FOLDER=$TempFolder" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "LOGS_FOLDER=$LogsFolder" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+        Write-Output "Output folder: $OutputFolder"
+        Write-Output "Temp folder: $TempFolder"
+        Write-Output "Logs folder: $LogsFolder"
+
+    - name: Clone or use content builder
+      shell: pwsh
+      run: |
+        if ("${{ inputs.content-builder-repo }}" -ne "") {
+          Write-Output "Cloning content builder from: ${{ inputs.content-builder-repo }}"
+          
+          # Clone to a temp location in the workspace
+          $ClonePath = Join-Path (Get-Location) "build-temp\content-builder-clone"
+          if (Test-Path $ClonePath) {
+            Remove-Item -Path $ClonePath -Recurse -Force
+          }
+          
+          git clone --depth 1 "https://github.com/${{ inputs.content-builder-repo }}.git" $ClonePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to clone content builder from ${{ inputs.content-builder-repo }}"
+          }
+          Write-Output "Content builder cloned to: $ClonePath"
+          
+          # Use content-builder-path as subfolder within clone (empty means root)
+          if ("${{ inputs.content-builder-path }}" -ne "") {
+            $ContentPath = Join-Path $ClonePath "${{ inputs.content-builder-path }}"
+            Write-Output "Using subfolder: ${{ inputs.content-builder-path }}"
+          } else {
+            $ContentPath = $ClonePath
+            Write-Output "Using repository root"
+          }
+          
+          if (-not (Test-Path $ContentPath)) {
+            Write-Error "Content builder path not found: $ContentPath"
+            exit 1
+          }
+        } else {
+          # Use content-builder-path as local path from repo root
+          Write-Output "Using local content builder: ${{ inputs.content-builder-path }}"
+          $ContentPath = Join-Path (Get-Location) "${{ inputs.content-builder-path }}"
+          
+          if (-not (Test-Path $ContentPath)) {
+            Write-Error "Content builder path not found: $ContentPath"
+            exit 1
+          }
+        }
+
+        Write-Output "Content builder location: $ContentPath"
+
+        # Find the .csproj file
+        $ProjectFiles = Get-ChildItem -Path $ContentPath -Filter "*.csproj" -Recurse
+        if ($ProjectFiles.Count -eq 0) {
+          Write-Error "No .csproj file found in: $ContentPath"
+          exit 1
+        }
+        if ($ProjectFiles.Count -gt 1) {
+          Write-Warning "Multiple .csproj files found, using first: $($ProjectFiles[0].FullName)"
+        }
+        $ProjectFile = $ProjectFiles[0].FullName
+        Write-Output "Found project file: $ProjectFile"
+
+        "CONTENT_PROJECT_PATH=$ContentPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "CONTENT_PROJECT_FILE=$ProjectFile" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Clone or use assets
+      shell: pwsh
+      run: |
+        if ("${{ inputs.assets-repo }}" -ne "") {
+          Write-Output "Cloning assets from: ${{ inputs.assets-repo }}"
+          
+          # Clone to a temp location in the workspace
+          $ClonePath = Join-Path (Get-Location) "build-temp\assets-clone"
+          if (Test-Path $ClonePath) {
+            Remove-Item -Path $ClonePath -Recurse -Force
+          }
+          
+          git clone --depth 1 "https://github.com/${{ inputs.assets-repo }}.git" $ClonePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to clone assets from ${{ inputs.assets-repo }}"
+          }
+          Write-Output "Assets cloned to: $ClonePath"
+          
+          # Use assets-path as subfolder within clone (empty means root)
+          if ("${{ inputs.assets-path }}" -ne "") {
+            $AssetsPath = Join-Path $ClonePath "${{ inputs.assets-path }}"
+            Write-Output "Using subfolder: ${{ inputs.assets-path }}"
+          } else {
+            $AssetsPath = $ClonePath
+            Write-Output "Using repository root"
+          }
+          
+          if (-not (Test-Path $AssetsPath)) {
+            Write-Error "Assets path not found: $AssetsPath"
+            exit 1
+          }
+        } else {
+          # Use assets-path as local path from repo root
+          Write-Output "Using local assets: ${{ inputs.assets-path }}"
+          $AssetsPath = Join-Path (Get-Location) "${{ inputs.assets-path }}"
+          
+          if (-not (Test-Path $AssetsPath)) {
+            Write-Error "Assets path not found: $AssetsPath"
+            exit 1
+          }
+        }
+
+        Write-Output "Assets location: $AssetsPath"
+
+        "ASSETS_SOURCE_PATH=$AssetsPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Restore content project
+      shell: pwsh
+      run: |
+        Write-Output "Restoring content project: $env:CONTENT_PROJECT_FILE"
+        # Content builder is a tool project, doesn't need runtime identifier
+        # Using RID causes unnecessary complexity and can fail with prerelease packages
+        dotnet restore "$env:CONTENT_PROJECT_FILE" 2>&1 | Tee-Object -FilePath "$env:LOGS_FOLDER\restore.log"
+        if ($LASTEXITCODE -ne 0) {
+          Write-Output "Restore log:"
+          Get-Content "$env:LOGS_FOLDER\restore.log" | Write-Output
+          throw "Restore failed with exit code: $LASTEXITCODE"
+        }
+        Write-Output "Content project restored successfully"
+
+    - name: Build content project
+      shell: pwsh
+      run: |
+        Write-Output "Building content project: $env:CONTENT_PROJECT_FILE"
+        dotnet build "$env:CONTENT_PROJECT_FILE" -c Release --no-restore 2>&1 | Tee-Object -FilePath "$env:LOGS_FOLDER\build.log"
+        if ($LASTEXITCODE -ne 0) {
+          Write-Output "Build log:"
+          Get-Content "$env:LOGS_FOLDER\build.log" | Write-Output
+          throw "Build failed with exit code: $LASTEXITCODE"
+        }
+        Write-Output "Content project built successfully"
+
+    - name: Run content pipeline
+      id: content-build
+      shell: pwsh
+      run: |
+        $LogFile = Join-Path $env:LOGS_FOLDER "content-pipeline.log"
+        Write-Output "Running content pipeline..."
+        Write-Output "  Builder: $env:CONTENT_PROJECT_FILE"
+        Write-Output "  Assets: $env:ASSETS_SOURCE_PATH"
+        Write-Output "  Platform: ${{ inputs.monogame-platform }}"
+        Write-Output "  Output: $env:OUTPUT_FOLDER"
+        Write-Output "  Temp: $env:TEMP_FOLDER"
+        Write-Output "  Additional args: ${{ inputs.additional-args }}"
+        Write-Output ""
+
+        # Build the command
+        $Command = @(
+          "dotnet",
+          "run",
+          "--configuration", "${{ inputs.configuration }}",
+          "--no-build",
+          "--project", "$env:CONTENT_PROJECT_FILE",
+          "--no-restore",
+          "--",
+          "build",
+          "-p", "${{ inputs.monogame-platform }}",
+          "-s", "$env:ASSETS_SOURCE_PATH",
+          "-o", "$env:OUTPUT_FOLDER",
+          "-i", "$env:TEMP_FOLDER"
+        )
+
+        # Add additional arguments if provided
+        if ("${{ inputs.additional-args }}" -ne "") {
+          # Parse additional-args as an array, respecting quotes (e.g., --message "Build Complete")
+          $AdditionalArgs = Invoke-Expression "@('${{ inputs.additional-args }}')"
+          $Command += $AdditionalArgs
+        }
+
+        Write-Output "Full command: $($Command -join ' ')"
+        Write-Output "---"
+
+        # Run the command and capture output
+        & $Command[0] $Command[1..($Command.Length-1)] 2>&1 | Tee-Object -FilePath $LogFile
+        $ExitCode = $LASTEXITCODE
+
+        Write-Output "---"
+        Write-Output "Exit code: $ExitCode"
+
+        # Set outputs
+        "output_folder=$env:OUTPUT_FOLDER" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        "log_file=$LogFile" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+        if ($ExitCode -eq 0) {
+          "success=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          Write-Output "Content pipeline completed successfully"
+        } else {
+          "success=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          Write-Error "Content pipeline failed with exit code: $ExitCode"
+          exit $ExitCode
+        }
+
+    - name: Verify output
+      shell: pwsh
+      run: |
+        Write-Output "Verifying content output..."
+        if (Test-Path $env:OUTPUT_FOLDER) {
+          $Items = Get-ChildItem -Path $env:OUTPUT_FOLDER -Recurse
+          Write-Output "Output folder contains $($Items.Count) items:"
+          $Items | ForEach-Object { Write-Output "  - $($_.FullName)" }
+        } else {
+          Write-Warning "Output folder not found or empty: $env:OUTPUT_FOLDER"
+        }
+
+    - name: Upload logs as artifact
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: content-build-logs-${{ inputs.monogame-platform }}-${{ github.run_id }}
+        path: ${{ env.LOGS_FOLDER }}
+        retention-days: 30
+
+    - name: Upload content output artifact
+      if: ${{ inputs.upload-output == 'true' }}
+      uses: actions/upload-artifact@v5
+      with:
+        name: content-output-${{ inputs.monogame-platform }}-${{ github.run_id }}
+        path: ${{ env.OUTPUT_FOLDER }}
+        retention-days: 30
