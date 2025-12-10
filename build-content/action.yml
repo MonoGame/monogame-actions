@@ -1,5 +1,6 @@
 name: "Build MonoGame Content"
 description: "Builds MonoGame content using the content builder console application"
+author: 'MonoGame'
 
 inputs:
   content-builder-path:
