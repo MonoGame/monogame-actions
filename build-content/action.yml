@@ -90,33 +90,27 @@ runs:
         Write-Output "Temp folder: $TempFolder"
         Write-Output "Logs folder: $LogsFolder"
 
-    - name: Clone or use content builder
+    - name: Checkout content builder repository
+      if: ${{ inputs.content-builder-repo != '' }}
+      uses: actions/checkout@v5
+      with:
+        repository: ${{ inputs.content-builder-repo }}
+        token: ${{ inputs.github-token }}
+        path: build-temp/content-builder-clone
+        fetch-depth: 1
+
+    - name: Resolve content builder path
       shell: pwsh
       run: |
         if ("${{ inputs.content-builder-repo }}" -ne "") {
-          Write-Output "Cloning content builder from: ${{ inputs.content-builder-repo }}"
-          
-          # Clone to a temp location in the workspace
-          $ClonePath = Join-Path (Get-Location) "build-temp\content-builder-clone"
-          if (Test-Path $ClonePath) {
-            Remove-Item -Path $ClonePath -Recurse -Force
-          }
-          
-          # Build clone URL with authentication if token is provided
-          $CloneUrl = "https://github.com/${{ inputs.content-builder-repo }}.git"
-          if ("${{ inputs.github-token }}" -ne "") {
-            $CloneUrl = "https://x-access-token:${{ inputs.github-token }}@github.com/${{ inputs.content-builder-repo }}.git"
-          }
-          
-          git clone --depth 1 "$CloneUrl" $ClonePath
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to clone content builder from ${{ inputs.content-builder-repo }}"
-          }
-          Write-Output "Content builder cloned to: $ClonePath"
+          Write-Output "Using content builder from: ${{ inputs.content-builder-repo }}"
+          $ClonePath = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) "build-temp\content-builder-clone"))
           
           # Use content-builder-path as subfolder within clone (empty means root)
-          if ("${{ inputs.content-builder-path }}" -ne "") {
-            $ContentPath = Join-Path $ClonePath "${{ inputs.content-builder-path }}"
+          if ("${{ inputs.content-builder-path }}" -ne "" -and "${{ inputs.content-builder-path }}" -ne ".") {
+            # Remove leading ./ or \ if present
+            $SubPath = "${{ inputs.content-builder-path }}" -replace '^[\\.]+', ''
+            $ContentPath = [System.IO.Path]::GetFullPath((Join-Path $ClonePath $SubPath))
             Write-Output "Using subfolder: ${{ inputs.content-builder-path }}"
           } else {
             $ContentPath = $ClonePath
@@ -130,7 +124,9 @@ runs:
         } else {
           # Use content-builder-path as local path from repo root
           Write-Output "Using local content builder: ${{ inputs.content-builder-path }}"
-          $ContentPath = Join-Path (Get-Location) "${{ inputs.content-builder-path }}"
+          # Normalize the path (remove leading ./ or \)
+          $InputPath = "${{ inputs.content-builder-path }}" -replace '^[\\.]+', ''
+          $ContentPath = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $InputPath))
           
           if (-not (Test-Path $ContentPath)) {
             Write-Error "Content builder path not found: $ContentPath"
@@ -155,33 +151,27 @@ runs:
         "CONTENT_PROJECT_PATH=$ContentPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         "CONTENT_PROJECT_FILE=$ProjectFile" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-    - name: Clone or use assets
+    - name: Checkout assets repository
+      if: ${{ inputs.assets-repo != '' }}
+      uses: actions/checkout@v5
+      with:
+        repository: ${{ inputs.assets-repo }}
+        token: ${{ inputs.github-token }}
+        path: build-temp/assets-clone
+        fetch-depth: 1
+
+    - name: Resolve assets path
       shell: pwsh
       run: |
         if ("${{ inputs.assets-repo }}" -ne "") {
-          Write-Output "Cloning assets from: ${{ inputs.assets-repo }}"
-          
-          # Clone to a temp location in the workspace
-          $ClonePath = Join-Path (Get-Location) "build-temp\assets-clone"
-          if (Test-Path $ClonePath) {
-            Remove-Item -Path $ClonePath -Recurse -Force
-          }
-          
-          # Build clone URL with authentication if token is provided
-          $CloneUrl = "https://github.com/${{ inputs.assets-repo }}.git"
-          if ("${{ inputs.github-token }}" -ne "") {
-            $CloneUrl = "https://x-access-token:${{ inputs.github-token }}@github.com/${{ inputs.assets-repo }}.git"
-          }
-          
-          git clone --depth 1 "$CloneUrl" $ClonePath
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to clone assets from ${{ inputs.assets-repo }}"
-          }
-          Write-Output "Assets cloned to: $ClonePath"
+          Write-Output "Using assets from: ${{ inputs.assets-repo }}"
+          $ClonePath = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) "build-temp\assets-clone"))
           
           # Use assets-path as subfolder within clone (empty means root)
-          if ("${{ inputs.assets-path }}" -ne "") {
-            $AssetsPath = Join-Path $ClonePath "${{ inputs.assets-path }}"
+          if ("${{ inputs.assets-path }}" -ne "" -and "${{ inputs.assets-path }}" -ne ".") {
+            # Remove leading ./ or \ if present
+            $SubPath = "${{ inputs.assets-path }}" -replace '^[\\.]+', ''
+            $AssetsPath = [System.IO.Path]::GetFullPath((Join-Path $ClonePath $SubPath))
             Write-Output "Using subfolder: ${{ inputs.assets-path }}"
           } else {
             $AssetsPath = $ClonePath
@@ -195,7 +185,9 @@ runs:
         } else {
           # Use assets-path as local path from repo root
           Write-Output "Using local assets: ${{ inputs.assets-path }}"
-          $AssetsPath = Join-Path (Get-Location) "${{ inputs.assets-path }}"
+          # Normalize the path (remove leading ./ or \)
+          $InputPath = "${{ inputs.assets-path }}" -replace '^[\\.]+', ''
+          $AssetsPath = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $InputPath))
           
           if (-not (Test-Path $AssetsPath)) {
             Write-Error "Assets path not found: $AssetsPath"
