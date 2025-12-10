@@ -27,6 +27,7 @@ jobs:
       - name: Setup Android
         uses: ./install-android-dependencies
       - name: Publish Game to itch.io
+        if: false  # Disabled while waiting on credentials
         uses: ./publish-itchio
         with:
           channel: ${{ matrix.channel }}
