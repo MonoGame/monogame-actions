@@ -2,15 +2,24 @@ name: Test My Action
 
 on:
   push:
-    paths:
-      - '**'
-      - '.github/workflows/main.yml'
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  test_linux:
-    runs-on: ubuntu-24.04
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            channel: ubuntu
+          - os: macos-latest
+            channel: osx
+          - os: windows-latest
+            channel: windows
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Wine
         uses: ./install-wine
       - name: Install Font
@@ -20,78 +29,27 @@ jobs:
       - name: Publish Game to itch.io
         uses: ./publish-itchio
         with:
-          channel: 'ubuntu'
+          channel: ${{ matrix.channel }}
           file: 'butler.zip'
           version: '1.0.0'
           ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
           ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
           ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
-      - name: check envar works
+      - name: Test Dotnet is installed
+        if: matrix.os != 'windows-latest'
         run: |
           ${{ env.WINEEXE }} dotnet --info
         shell: bash
-  test_linux_22_04:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Wine
-        uses: ./install-wine
-      - name: Install Font
-        uses: ./install-fonts
-      - name: Setup Android
-        uses: ./install-android-dependencies
-      - name: Publish Game to itch.io
-        uses: ./publish-itchio
+
+      # Test Content Builder Automation
+      - name: Build Content (DesktopGL)
+        id: build_content
+        uses: ./build-content
         with:
-          channel: 'ubuntu'
-          file: 'butler.zip'
-          version: '1.0.0'
-          ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
-          ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
-          ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
-      - name: Test Dotnet is installed
-        run: |
-          ${{ env.WINEEXE }} dotnet.exe --info
-        shell: bash
-  test_mac:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Wine
-        uses: ./install-wine
-      - name: Install Font
-        uses: ./install-fonts
-      - name: Setup Android
-        uses: ./install-android-dependencies
-      - name: Publish Game to itch.io
-        uses: ./publish-itchio
-        with:
-          channel: 'osx'
-          file: 'butler.zip'
-          version: '1.0.0'
-          ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
-          ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
-          ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
-      - name: Test Dotnet is installed
-        run: |
-          ${{ env.WINEEXE }} dotnet.exe --info
-        shell: bash
-  test_windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Wine
-        uses: ./install-wine
-      - name: Install Font
-        uses: ./install-fonts
-      - name: Setup Android
-        uses: ./install-android-dependencies
-      - name: Publish Game to itch.io
-        uses: ./publish-itchio
-        with:
-          channel: 'windows'
-          file: 'butler.zip'
-          version: '1.0.0'
-          ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
-          ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
-          ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
+          content-builder-repo: 'MonoGame/MonoGame-CBPlatform-BuilderTest'
+          content-builder-path: 'Content'
+          assets-repo: 'MonoGame/MonoGame-CBPlatform-TestAssets'
+          assets-path: ''
+          monogame-platform: 'DesktopGL'
+          output-folder: 'CBPlatformTest/CBPlatformTest.DesktopGL/bin/Release/net9.0/win-x64/Content'
+          upload-output: 'false'
