@@ -291,7 +291,7 @@ runs:
       if: always()
       uses: actions/upload-artifact@v5
       with:
-        name: content-build-logs-${{ inputs.monogame-platform }}-${{ github.run_id }}
+        name: content-build-logs-${{ inputs.monogame-platform }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
         path: ${{ env.LOGS_FOLDER }}
         retention-days: 30
 
@@ -299,6 +299,6 @@ runs:
       if: ${{ inputs.upload-output == 'true' }}
       uses: actions/upload-artifact@v5
       with:
-        name: content-output-${{ inputs.monogame-platform }}-${{ github.run_id }}
+        name: content-output-${{ inputs.monogame-platform }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
         path: ${{ env.OUTPUT_FOLDER }}
         retention-days: 30
