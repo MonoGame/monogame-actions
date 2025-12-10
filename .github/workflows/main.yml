@@ -13,13 +13,8 @@ jobs:
         include:
           - os: ubuntu-24.04
             channel: ubuntu
-            dotnet-command: dotnet
-          - os: ubuntu-22.04
-            channel: ubuntu
-            dotnet-command: dotnet.exe
           - os: macos-latest
             channel: osx
-            dotnet-command: dotnet.exe
           - os: windows-latest
             channel: windows
 
@@ -31,19 +26,19 @@ jobs:
         uses: ./install-fonts
       - name: Setup Android
         uses: ./install-android-dependencies
-      # - name: Publish Game to itch.io
-      #   uses: ./publish-itchio
-      #   with:
-      #     channel: ${{ matrix.channel }}
-      #     file: 'butler.zip'
-      #     version: '1.0.0'
-      #     ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
-      #     ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
-      #     ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
+      - name: Publish Game to itch.io
+        uses: ./publish-itchio
+        with:
+          channel: ${{ matrix.channel }}
+          file: 'butler.zip'
+          version: '1.0.0'
+          ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
+          ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
+          ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
       - name: Test Dotnet is installed
         if: matrix.os != 'windows-latest'
         run: |
-          ${{ env.WINEEXE }} ${{ matrix.dotnet-command }} --info
+          ${{ env.WINEEXE }} dotnet --info
         shell: bash
 
       # Test Content Builder Automation

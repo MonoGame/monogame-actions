@@ -45,6 +45,11 @@ inputs:
     required: false
     default: 'Release'
 
+  github-token:
+    description: 'GitHub Personal Access Token (PAT) for cloning private repositories. If not provided, public repositories can still be cloned.'
+    required: false
+    default: ''
+
 outputs:
   output-folder:
     description: "Full path to the output folder"
@@ -96,7 +101,13 @@ runs:
             Remove-Item -Path $ClonePath -Recurse -Force
           }
           
-          git clone --depth 1 "https://github.com/${{ inputs.content-builder-repo }}.git" $ClonePath
+          # Build clone URL with authentication if token is provided
+          $CloneUrl = "https://github.com/${{ inputs.content-builder-repo }}.git"
+          if ("${{ inputs.github-token }}" -ne "") {
+            $CloneUrl = "https://x-access-token:${{ inputs.github-token }}@github.com/${{ inputs.content-builder-repo }}.git"
+          }
+          
+          git clone --depth 1 "$CloneUrl" $ClonePath
           if ($LASTEXITCODE -ne 0) {
             throw "Failed to clone content builder from ${{ inputs.content-builder-repo }}"
           }
@@ -155,7 +166,13 @@ runs:
             Remove-Item -Path $ClonePath -Recurse -Force
           }
           
-          git clone --depth 1 "https://github.com/${{ inputs.assets-repo }}.git" $ClonePath
+          # Build clone URL with authentication if token is provided
+          $CloneUrl = "https://github.com/${{ inputs.assets-repo }}.git"
+          if ("${{ inputs.github-token }}" -ne "") {
+            $CloneUrl = "https://x-access-token:${{ inputs.github-token }}@github.com/${{ inputs.assets-repo }}.git"
+          }
+          
+          git clone --depth 1 "$CloneUrl" $ClonePath
           if ($LASTEXITCODE -ne 0) {
             throw "Failed to clone assets from ${{ inputs.assets-repo }}"
           }
@@ -207,7 +224,7 @@ runs:
       shell: pwsh
       run: |
         Write-Output "Building content project: $env:CONTENT_PROJECT_FILE"
-        dotnet build "$env:CONTENT_PROJECT_FILE" -c Release --no-restore 2>&1 | Tee-Object -FilePath "$env:LOGS_FOLDER\build.log"
+        dotnet build "$env:CONTENT_PROJECT_FILE" -c ${{ inputs.configuration }} --no-restore 2>&1 | Tee-Object -FilePath "$env:LOGS_FOLDER\build.log"
         if ($LASTEXITCODE -ne 0) {
           Write-Output "Build log:"
           Get-Content "$env:LOGS_FOLDER\build.log" | Write-Output
@@ -247,9 +264,8 @@ runs:
 
         # Add additional arguments if provided
         if ("${{ inputs.additional-args }}" -ne "") {
-          # Parse additional-args as an array, respecting quotes (e.g., --message "Build Complete")
-          $AdditionalArgs = Invoke-Expression "@('${{ inputs.additional-args }}')"
-          $Command += $AdditionalArgs
+          # Safely split additional-args into array (does not handle quotes, but avoids code execution)
+          $Command += "${{ inputs.additional-args }}".Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries)
         }
 
         Write-Output "Full command: $($Command -join ' ')"
