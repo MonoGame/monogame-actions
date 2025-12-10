@@ -218,8 +218,6 @@ jobs:
         with:
           dotnet-version: '9.0.x'
       
-
-      
       - name: Process content for ${{ matrix.platform }}
         uses: ./.github/actions/build-content
         with:
@@ -301,6 +299,7 @@ jobs:
 **Example repository structures:**
 
 Content builder repository (`MyOrg/monogame-content-pipelines`):
+
 ```
 builders/
   DesktopGL/
@@ -315,6 +314,7 @@ builders/
 ```
 
 Assets repository (`MyOrg/game-assets-library`):
+
 ```
 projects/
   MyGame/
@@ -453,8 +453,9 @@ jobs:
 The action automatically uploads two types of artifacts:
 
 ### Build Logs (Always)
-- **Name**: `content-build-logs-<run_id>`
-- **Contains**: 
+
+- **Name**: `content-build-logs-<platform>-<run_id>`
+- **Contains**:
   - `restore.log` - Content project restore output
   - `build.log` - Content project build output
   - `content-pipeline.log` - Content pipeline execution output
@@ -462,6 +463,7 @@ The action automatically uploads two types of artifacts:
 - **When**: Always uploaded (even on failure) for debugging
 
 ### Content Output (Optional)
+
 - **Name**: `content-output-<platform>-<run_id>`
 - **Contains**: The compiled content files for the specified platform
 - **Retention**: 30 days
@@ -470,50 +472,62 @@ The action automatically uploads two types of artifacts:
 ## Troubleshooting
 
 ### Content Builder Not Found
+
 **Error**: `Content builder path not found` or `No .csproj file found`
 
-**Solution**: 
+**Solution**:
+
 - When using local builder: Ensure `content-builder-path` points to the correct directory (e.g., `'./Content'` or `'./Content/Builder'`)
 - When using remote builder: Verify the repository exists and `content-builder-path` points to the correct subfolder (or use `""` for root)
 - The action automatically searches recursively for `.csproj` files; if multiple are found, it uses the first one
 
 ### Assets Not Found
+
 **Error**: `Assets path not found`
 
-**Solution**: 
+**Solution**:
+
 - When using local assets: Verify `assets-path` points to the directory containing your raw assets (e.g., `'./Assets'`)
 - When using remote assets: Verify the repository exists and `assets-path` points to the correct subfolder (or use `""` for root)
 - Check for typos in folder paths (paths are case-sensitive on Linux/macOS runners)
 
 ### Understanding Path Parameters
+
 The path parameters have dual meaning depending on whether you're using local or remote sources:
 
 **For local content builder:**
+
 - Set `content-builder-path` to your local path from repo root (e.g., `'./Content'` or `'./Content/Builder'`)
 - Do NOT set `content-builder-repo`
 
 **For remote content builder:**
+
 - Set `content-builder-repo` to the GitHub repository (e.g., `'MyOrg/content-builder'`)
 - Set `content-builder-path` to the subfolder within the cloned repo (e.g., `'builders/desktop'` or `""` for root)
 
 The same pattern applies to assets with `assets-path` and `assets-repo`.
 
 ### Clone Failures
+
 **Error**: Git clone fails for `content-builder-repo` or `assets-repo`
 
-**Solution**: 
+**Solution**:
+
 - Verify the repository exists and is public, or ensure proper authentication
 - Check the format is exactly `owner/repo` (no `https://` or `.git`)
 
 ### Platform Not Recognized
+
 **Error**: Invalid platform specified
 
 **Solution**: Ensure `monogame-platform` matches one of MonoGame's supported platforms exactly (case-sensitive).
 
 ### Content Pipeline Errors
+
 **Error**: Content pipeline fails during processing
 
-**Solution**: 
+**Solution**:
+
 - Download the `content-build-logs-<run_id>` artifact
 - Review `content-pipeline.log` for detailed error messages
 - Check asset file formats and content processor settings
@@ -521,6 +535,7 @@ The same pattern applies to assets with `assets-path` and `assets-repo`.
 ## Dependencies
 
 This action requires:
+
 - .NET SDK (version compatible with your MonoGame Content Builder)
 - Git (for cloning external repositories)
 - MonoGame Content Pipeline tools (included in the content builder project)
