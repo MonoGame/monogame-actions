@@ -95,7 +95,7 @@ runs:
       uses: actions/checkout@v5
       with:
         repository: ${{ inputs.content-builder-repo }}
-        token: ${{ inputs.github-token }}
+        token: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         path: build-temp/content-builder-clone
         fetch-depth: 1
 
@@ -156,7 +156,7 @@ runs:
       uses: actions/checkout@v5
       with:
         repository: ${{ inputs.assets-repo }}
-        token: ${{ inputs.github-token }}
+        token: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         path: build-temp/assets-clone
         fetch-depth: 1
 
