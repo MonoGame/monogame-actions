@@ -2,9 +2,8 @@ name: Test My Action
 
 on:
   push:
-    paths:
-      - '**'
-      - '.github/workflows/main.yml'
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
