@@ -8,7 +8,7 @@ inputs:
   tag:
     description: 'The tag to use for the upload (e.g., "-latest", "-stable").'
     required: false
-    default: 'latest'
+    default: '-latest'
   file:
     description: 'The path to the file to upload.'
     required: true
