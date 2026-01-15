@@ -42,14 +42,14 @@ jobs:
         shell: bash
 
       # Test Content Builder Automation
-      - name: Build Content (DesktopGL)
-        id: build_content
-        uses: ./build-content
-        with:
-          content-builder-repo: 'MonoGame/MonoGame-CBPlatform-BuilderTest'
-          content-builder-path: 'Content'
-          assets-repo: 'MonoGame/MonoGame-CBPlatform-TestAssets'
-          assets-path: ''
-          monogame-platform: 'DesktopGL'
-          output-folder: 'CBPlatformTest/CBPlatformTest.DesktopGL/bin/Release/net9.0/win-x64/Content'
-          upload-output: 'false'
+      #- name: Build Content (DesktopGL)
+      #  id: build_content
+      #  uses: ./build-content
+      #  with:
+      #    content-builder-repo: 'MonoGame/MonoGame-CBPlatform-BuilderTest'
+      #    content-builder-path: 'Content'
+      #    assets-repo: 'MonoGame/MonoGame-CBPlatform-TestAssets'
+      #    assets-path: ''
+      #    monogame-platform: 'DesktopGL'
+      #    output-folder: 'CBPlatformTest/CBPlatformTest.DesktopGL/bin/Release/net9.0/win-x64/Content'
+      #    upload-output: 'false'
