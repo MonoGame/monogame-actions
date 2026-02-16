@@ -37,7 +37,10 @@ runs:
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt update
         sudo apt install p7zip-full curl
-        sudo dpkg --add-architecture i386 
+        sudo dpkg --add-architecture i386
+        lsb_release -a 2>/dev/null || cat /etc/os-release
+        uname -m
+        dpkg --print-architecture
         sudo mkdir -pm755 /etc/apt/keyrings
         sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/${{ steps.osversion.outputs.winesource }}/winehq-${{ steps.osversion.outputs.winesource }}.sources
