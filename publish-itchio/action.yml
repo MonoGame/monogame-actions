@@ -38,16 +38,17 @@ runs:
         echo "Version: ${{ inputs.version }}"
       shell: bash
     - name: Install butler
+      if: runner.os != 'Linux' && runner.arch != 'ARM64'
       run: |
-            if [ "$RUNNER_OS" == "Linux" && "$RUNNER_ARCH" != "ARM64" ]; then
+            if [[ "$RUNNER_OS" == "Linux" ]]; then
                   curl -L https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
-            elif [ "$RUNNER_OS" == "Windows" ]; then
+            elif [[ "$RUNNER_OS" == "Windows" ]]; then
                   curl -L https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
-            elif [ "$RUNNER_OS" == "macOS" ]; then
+            elif [[ "$RUNNER_OS" == "macOS" ]]; then
                   curl -L https://broth.itch.zone/butler/darwin-amd64/LATEST/archive/default -o butler.zip
                   7z x butler.zip
                   ./butler version
