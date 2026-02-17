@@ -29,15 +29,16 @@ runs:
         else
           echo "winesource=jammy" >> "$GITHUB_OUTPUT"
         fi
+        echo "${{ runner.arch  }}"
       shell: bash
     - name: Install Wine Dependencies for Ubuntu
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && runner.arch != 'ARM64'
       run: |
         sudo apt clean
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt update
         sudo apt install p7zip-full curl
-        sudo dpkg --add-architecture i386 
+        sudo dpkg --add-architecture i386
         sudo mkdir -pm755 /etc/apt/keyrings
         sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/${{ steps.osversion.outputs.winesource }}/winehq-${{ steps.osversion.outputs.winesource }}.sources
@@ -46,13 +47,13 @@ runs:
         sudo apt install --install-recommends winehq-stable      
       shell: bash
     - name: Install Dotnet in Wine
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         wget -qO- https://monogame.net/downloads/net9_mgfxc_wine_setup.sh | bash
         echo "$HOME/.winemonogame" >> "$GITHUB_PATH"
       shell: bash
     - name: Setup Environment
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         echo "WINEPREFIX=$HOME/.winemonogame" >> $GITHUB_ENV
         echo "WINEARCH=win64" >> $GITHUB_ENV
@@ -62,7 +63,7 @@ runs:
         echo "WINEEXE=$(which wine64)" >> "$GITHUB_ENV"
       shell: bash
     - name: Wine Version
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         ${{ env.WINEEXE }} --version
       shell: bash

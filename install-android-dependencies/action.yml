@@ -10,7 +10,7 @@ runs:
         distribution: 'microsoft' # See 'Supported distributions' for available options
         java-version: '17'
     - name: Install Android Dependencies
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
           echo $ANDROID_HOME
           find $ANDROID_HOME | grep sdkmanager
