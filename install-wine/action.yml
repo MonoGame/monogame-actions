@@ -47,13 +47,13 @@ runs:
         sudo apt install --install-recommends winehq-stable      
       shell: bash
     - name: Install Dotnet in Wine
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         wget -qO- https://monogame.net/downloads/net9_mgfxc_wine_setup.sh | bash
         echo "$HOME/.winemonogame" >> "$GITHUB_PATH"
       shell: bash
     - name: Setup Environment
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         echo "WINEPREFIX=$HOME/.winemonogame" >> $GITHUB_ENV
         echo "WINEARCH=win64" >> $GITHUB_ENV
