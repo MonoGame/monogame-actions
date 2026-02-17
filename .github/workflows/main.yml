@@ -12,9 +12,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            channel: ubuntu
+            channel: linux
           - os: ubuntu-22.04-arm
-            channel: ubuntu
+            channel: linux
           - os: macos-latest
             channel: osx
           - os: windows-latest
