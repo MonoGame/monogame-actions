@@ -38,6 +38,7 @@ runs:
         echo "Version: ${{ inputs.version }}"
       shell: bash
     - name: Install butler
+      if: !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
             if [ "$RUNNER_OS" == "Linux" ]; then
                   curl -L https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default -o butler.zip
@@ -55,6 +56,7 @@ runs:
             echo "PATH=${GITHUB_WORKSPACE}/butler:${PATH}" >> ${GITHUB_ENV}
       shell: bash
     - name: Publish
+      if: !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         ./butler push ${{ inputs.file }} ${{ inputs.ITCHIO_USER }}/${{ inputs.ITCHIO_GAME }}:${{ inputs.channel }}${{ inputs.tag }} --userversion ${{ inputs.version }} -v
       shell: bash
