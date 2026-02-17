@@ -29,9 +29,10 @@ runs:
         else
           echo "winesource=jammy" >> "$GITHUB_OUTPUT"
         fi
+        echo "${{ runner.arch  }}"
       shell: bash
     - name: Install Wine Dependencies for Ubuntu
-      if: runner.os == 'Linux' && runner.arch != 'arm64'
+      if: runner.os == 'Linux' && runner.arch != 'ARM64'
       run: |
         sudo apt clean
         sudo rm -rf /var/lib/apt/lists/*
