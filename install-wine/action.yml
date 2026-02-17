@@ -63,7 +63,7 @@ runs:
         echo "WINEEXE=$(which wine64)" >> "$GITHUB_ENV"
       shell: bash
     - name: Wine Version
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         ${{ env.WINEEXE }} --version
       shell: bash
