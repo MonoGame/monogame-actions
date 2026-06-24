@@ -53,7 +53,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -87,7 +87,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -123,10 +123,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Checkout content builder action
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: MyOrg/monogame-content-tools
           path: .github/actions/build-content
@@ -165,10 +165,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Checkout content builder action
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: MyOrg/monogame-content-builder
           path: .github/actions/build-content
@@ -211,7 +211,7 @@ jobs:
       matrix:
         platform: [DesktopGL, iOS, Android]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -239,7 +239,7 @@ jobs:
       matrix:
         platform: [DesktopGL, iOS, Android]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Download content for ${{ matrix.platform }}
         uses: actions/download-artifact@v4
@@ -274,7 +274,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -343,7 +343,7 @@ jobs:
   build-desktop:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -368,7 +368,7 @@ jobs:
   build-mobile:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -431,7 +431,7 @@ jobs:
             os: windows-latest
             runtime: win-x64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v5

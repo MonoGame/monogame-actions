@@ -3,7 +3,7 @@
 A composite GitHub Action that validates a MonoGame `dotnet new` template: it generates the template across the platforms **it declares**, checks the output is clean and coherent, and (where the runner can) compiles each target. One generic engine — the template under test drives which tests run, so it works for any MonoGame sample.
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v7
 - uses: MonoGame/monogame-actions/sample-template-validator@v1
   with:
     template: .                       # folder containing .template.config

@@ -92,7 +92,7 @@ runs:
 
     - name: Checkout content builder repository
       if: ${{ inputs.content-builder-repo != '' }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7
       with:
         repository: ${{ inputs.content-builder-repo }}
         token: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
@@ -153,7 +153,7 @@ runs:
 
     - name: Checkout assets repository
       if: ${{ inputs.assets-repo != '' }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7
       with:
         repository: ${{ inputs.assets-repo }}
         token: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
