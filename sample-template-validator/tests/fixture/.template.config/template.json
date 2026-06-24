@@ -29,17 +29,17 @@
     "GameTitle": {
       "type": "parameter",
       "datatype": "text",
-      "replaces": "Fixture",
-      "defaultValue": "Fixture",
+      "replaces": "Sample Game",
+      "defaultValue": "Sample Game",
       "description": "The display name for your game that players will see."
     },
     "AssemblyName": {
       "type": "parameter",
       "datatype": "text",
-      "replaces": "Fixture",
-      "defaultValue": "Fixture",
+      "replaces": "SampleGame",
+      "defaultValue": "SampleGame",
       "description": "The name for your built assembly file."
-    },    
+    },
     "Platforms": {
       "type": "parameter",
       "datatype": "choice",

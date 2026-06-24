@@ -5,5 +5,7 @@ namespace Fixture;
 /// </summary>
 public static class FixtureInfo
 {
-    public const string Name = "Fixture";
+    public const string Name = "Fixture";         // sourceName
+    public const string Title = "Sample Game";    // GameTitle replaces this
+    public const string Assembly = "SampleGame";  // AssemblyName replaces this
 }

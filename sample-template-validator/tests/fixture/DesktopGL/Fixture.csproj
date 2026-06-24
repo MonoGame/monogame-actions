@@ -2,6 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
+    <AssemblyName>SampleGame</AssemblyName>
+    <AssemblyTitle>Sample Game</AssemblyTitle>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\**\*.cs" />
