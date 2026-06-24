@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -42,6 +45,21 @@ jobs:
         run: |
           ${{ env.WINEEXE }} dotnet --info
         shell: bash
+  test-template-validator:
+    name: self-test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, macos-latest, ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run sample-template-validator against the fixture
+        uses: ./sample-template-validator
+        with:
+          template: sample-template-validator/tests/fixture
 
       # Test Content Builder Automation
       #- name: Build Content (DesktopGL)

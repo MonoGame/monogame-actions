@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "MonoGame Foundation",
+  "classifications": [ "MonoGame", "Test" ],
+  "identity": "MonoGame.TemplateTester.Fixture.CSharp",
+  "name": "Template tester fixture",
+  "description": "Minimal multi-platform fixture used to self-test the sample-template-validator action. Trivial projects, no MonoGame dependency. Uses deliberately non-canonical tokens to prove the monogame.platforms map decouples token from folder/target.",
+  "shortName": "mg-fixture",
+  "sourceName": "Fixture",
+  "defaultName": "MyFixture",
+  "tags": { "language": "C#", "type": "project" },
+  "preferNameDirectory": true,
+
+  "monogame": {
+    "longDescription": "Minimal multi-platform fixture used to self-test the sample-template-validator action. Trivial projects, no MonoGame dependency. Uses deliberately non-canonical tokens to prove the monogame.platforms map decouples token from folder/target.",
+    "images": [],
+    "videos": [],
+    "links": [],
+
+    "monoGameVersion": "3.8.5",    
+    "platforms": {
+      "gl":    { "target": "DesktopGL",   "folder": "DesktopGL" },
+      "dx12":  { "target": "WindowsDX12", "folder": "WindowsDX12" },
+      "droid": { "target": "Android",     "folder": "Android" }
+    }
+  },
+
+  "symbols": {
+    "GameTitle": {
+      "type": "parameter",
+      "datatype": "text",
+      "replaces": "Fixture",
+      "defaultValue": "Fixture",
+      "description": "The display name for your game that players will see."
+    },
+    "AssemblyName": {
+      "type": "parameter",
+      "datatype": "text",
+      "replaces": "Fixture",
+      "defaultValue": "Fixture",
+      "description": "The name for your built assembly file."
+    },    
+    "Platforms": {
+      "type": "parameter",
+      "datatype": "choice",
+      "allowMultipleValues": true,
+      "choices": [
+        { "choice": "gl",    "description": "Cross-platform OpenGL desktop" },
+        { "choice": "dx12",  "description": "Windows DirectX 12 desktop" },
+        { "choice": "droid", "description": "Android" }
+      ],
+      "defaultValue": "gl",
+      "description": "Target platforms."
+    },
+    "IncludeGL":    { "type": "computed", "value": "Platforms == gl" },
+    "IncludeDX12":  { "type": "computed", "value": "Platforms == dx12" },
+    "IncludeDroid": { "type": "computed", "value": "Platforms == droid" }
+  },
+
+  "sources": [
+    {
+      "modifiers": [
+        { "condition": "(!IncludeGL)",    "exclude": [ "DesktopGL/**" ] },
+        { "condition": "(!IncludeDX12)",  "exclude": [ "WindowsDX12/**" ] },
+        { "condition": "(!IncludeDroid)", "exclude": [ "Android/**" ] }
+      ]
+    }
+  ],
+
+  "specialCustomOperations": {
+    "**/*.slnx": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "actionableIf":     [ "<!--#if" ],
+            "actionableElse":   [ "#else", "<!--#else" ],
+            "actionableElseif": [ "#elseif", "<!--#elseif", "#elif", "<!--#elif" ],
+            "endif":            [ "#endif", "<!--#endif" ],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        }
+      ]
+    }
+  }
+}

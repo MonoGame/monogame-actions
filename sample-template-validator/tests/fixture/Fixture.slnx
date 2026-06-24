@@ -1,0 +1,17 @@
+<Solution>
+  <!--#if (IncludeGL) -->
+  <Folder Name="/DesktopGL/">
+    <Project Path="DesktopGL/Fixture.csproj" />
+  </Folder>
+  <!--#endif -->
+  <!--#if (IncludeDX12) -->
+  <Folder Name="/WindowsDX12/">
+    <Project Path="WindowsDX12/Fixture.csproj" />
+  </Folder>
+  <!--#endif -->
+  <!--#if (IncludeDroid) -->
+  <Folder Name="/Android/">
+    <Project Path="Android/Fixture.csproj" />
+  </Folder>
+  <!--#endif -->
+</Solution>

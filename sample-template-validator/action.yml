@@ -1,0 +1,54 @@
+name: 'Validate MonoGame template'
+description: 'Generates a MonoGame dotnet template across the platforms it declares, and optionally builds the ones the host can compile.'
+
+inputs:
+  template:
+    description: 'Path (relative to the checked-out repo) to the template - the folder containing .template.config.'
+    required: false
+    default: '.'
+  platform-symbol:
+    description: 'The choice symbol in template.json that lists target platforms.'
+    required: false
+    default: 'Platforms'
+  workload:
+    description: 'Optional dotnet workload to install before testing (e.g. "ios" or "android").'
+    required: false
+    default: ''
+  include-build:
+    description: 'Whether to compile the host-buildable platforms ("true"/"false").'
+    required: false
+    default: 'true'
+  dotnet-version:
+    description: '.NET SDK version to set up.'
+    required: false
+    default: '10.0.x'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    # Need to double check with an actual sample to ensure enough dependencies are installed for the content pipeline to work on Linux.
+    - name: Install Linux content-pipeline dependencies
+      if: ${{ runner.os == 'Linux' && inputs.include-build == 'true' }}
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libfreetype6 ffmpeg
+
+    - name: Install workload
+      if: ${{ inputs.workload != '' }}
+      shell: pwsh
+      run: dotnet workload install ${{ inputs.workload }}
+
+    - name: Validate template
+      shell: pwsh
+      env:
+        PLATFORM_SYMBOL: ${{ inputs.platform-symbol }}
+        INCLUDE_BUILD: ${{ inputs.include-build }}
+      run: |
+        $env:TEMPLATE_ROOT = (Resolve-Path "${{ inputs.template }}").Path
+        dotnet test "${{ github.action_path }}/engine/TemplateTester.csproj" --logger "console;verbosity=normal"
