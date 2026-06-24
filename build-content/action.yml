@@ -298,7 +298,7 @@ runs:
 
     - name: Upload logs as artifact
       if: always()
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       with:
         name: content-build-logs-${{ inputs.monogame-platform }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
         path: ${{ env.LOGS_FOLDER }}
@@ -306,7 +306,7 @@ runs:
 
     - name: Upload content output artifact
       if: ${{ inputs.upload-output == 'true' }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       with:
         name: content-output-${{ inputs.monogame-platform }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}
         path: ${{ env.OUTPUT_FOLDER }}
