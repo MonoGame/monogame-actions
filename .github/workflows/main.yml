@@ -2,11 +2,17 @@ name: Test My Action
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -35,8 +41,8 @@ jobs:
         uses: ./publish-itchio
         with:
           channel: ${{ matrix.channel }}
-          file: 'butler.zip'
-          version: '1.0.0'
+          file: "butler.zip"
+          version: "1.0.0"
           ITCHIO_USER: ${{ secrets.ITCHIO_USER }}
           ITCHIO_GAME: ${{ secrets.ITCHIO_GAME }}
           ITCHIO_TOKEN: ${{ secrets.ITCHIO_TOKEN }}
@@ -52,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest, macos-latest, ubuntu-latest ]
+        os: [windows-latest, macos-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v7
 
