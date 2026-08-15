@@ -69,7 +69,6 @@ runs:
         chmod +x "$HOME/winebox/bin/wine" "$HOME/winebox/bin/winepath"
 
         echo "$HOME/winebox/bin" >> "$GITHUB_PATH"
-        echo "$RUNNER_TEMP/wine-11.13-amd64-wow64/bin" >> "$GITHUB_PATH"
       shell: bash
     - name: Install Dotnet in Wine
       if: runner.os != 'Windows'
