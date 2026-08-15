@@ -61,6 +61,7 @@ runs:
         echo "MVK_CONFIG_LOG_LEVEL=0" >> $GITHUB_ENV
         echo "WINEDLLOVERRIDES=d3dcompiler_47=d,explorer.exe=e,services.exe=f" >> $GITHUB_ENV
         echo "WINEEXE=$(which wine64)" >> "$GITHUB_ENV"
+        echo "MGFXC_WINE_PATH=$HOME/.winemonogame" >> "$GITHUB_ENV"
       shell: bash
     - name: Wine Version
       if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
