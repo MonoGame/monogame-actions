@@ -46,14 +46,47 @@ runs:
         sudo apt-cache policy winehq-stable
         sudo apt install --install-recommends winehq-stable      
       shell: bash
+    - name: Install Box64 and x64 Wine for Ubuntu ARM64
+      if: runner.os == 'Linux' && runner.arch == 'ARM64'
+      run: |
+        sudo apt clean
+        sudo rm -rf /var/lib/apt/lists/*
+        sudo apt update
+        sudo apt install -y --no-install-recommends build-essential cmake curl git p7zip-full xvfb libsdl2-2.0-0
+
+        git clone --depth 1 --branch v0.4.2 https://github.com/ptitSeb/box64.git "$RUNNER_TEMP/box64"
+        cmake -S "$RUNNER_TEMP/box64" -B "$RUNNER_TEMP/box64/build" -D ARM_DYNAREC=ON -D CMAKE_BUILD_TYPE=RelWithDebInfo
+        cmake --build "$RUNNER_TEMP/box64/build" --parallel 2
+        sudo cmake --install "$RUNNER_TEMP/box64/build"
+
+        curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/11.13/wine-11.13-amd64-wow64.tar.xz -o "$RUNNER_TEMP/wine-11.13-amd64-wow64.tar.xz"
+        tar -xf "$RUNNER_TEMP/wine-11.13-amd64-wow64.tar.xz" -C "$RUNNER_TEMP"
+
+        mkdir -p "$HOME/winebox/bin"
+        printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/wine\" \"\$@\"" > "$HOME/winebox/bin/wine"
+        printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/wine\" \"\$@\"" > "$HOME/winebox/bin/wine64"
+        printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/winepath\" \"\$@\"" > "$HOME/winebox/bin/winepath"
+        chmod +x "$HOME/winebox/bin/wine" "$HOME/winebox/bin/wine64" "$HOME/winebox/bin/winepath"
+
+        echo "$HOME/winebox/bin" >> "$GITHUB_PATH"
+        echo "$RUNNER_TEMP/wine-11.13-amd64-wow64/bin" >> "$GITHUB_PATH"
+      shell: bash
     - name: Install Dotnet in Wine
       if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
       run: |
         wget -qO- https://monogame.net/downloads/net9_mgfxc_wine_setup.sh | bash
         echo "$HOME/.winemonogame" >> "$GITHUB_PATH"
       shell: bash
+    - name: Install Dotnet in Wine for Ubuntu ARM64
+      if: runner.os == 'Linux' && runner.arch == 'ARM64'
+      run: |
+        script_path="$RUNNER_TEMP/net9_mgfxc_wine_setup.sh"
+        curl -fsSL https://monogame.net/downloads/net9_mgfxc_wine_setup.sh -o "$script_path"
+        xvfb-run -a bash "$script_path"
+        echo "$HOME/.winemonogame" >> "$GITHUB_PATH"
+      shell: bash
     - name: Setup Environment
-      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
+      if: runner.os != 'Windows'
       run: |
         echo "WINEPREFIX=$HOME/.winemonogame" >> $GITHUB_ENV
         echo "WINEARCH=win64" >> $GITHUB_ENV
@@ -63,7 +96,7 @@ runs:
         echo "WINEEXE=$(which wine64)" >> "$GITHUB_ENV"
       shell: bash
     - name: Wine Version
-      if: runner.os != 'Windows' && !(runner.os == 'Linux' && runner.arch == 'ARM64')
+      if: runner.os != 'Windows'
       run: |
         ${{ env.WINEEXE }} --version
       shell: bash
