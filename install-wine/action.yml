@@ -7,6 +7,7 @@ runs:
     - name: Install Wine Dependencies for MacOS
       if: runner.os == 'macOS'
       run: |
+        brew upgrade
         brew install libpng libjpeg libtiff
         brew install --cask xquartz wine-stable
         xattr -dr com.apple.quarantine "/Applications/Wine Stable.app"
