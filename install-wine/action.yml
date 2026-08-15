@@ -64,9 +64,8 @@ runs:
 
         mkdir -p "$HOME/winebox/bin"
         printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/wine\" \"\$@\"" > "$HOME/winebox/bin/wine"
-        printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/wine\" \"\$@\"" > "$HOME/winebox/bin/wine64"
         printf '%s\n' '#!/bin/sh' "exec box64 \"$RUNNER_TEMP/wine-11.13-amd64-wow64/bin/winepath\" \"\$@\"" > "$HOME/winebox/bin/winepath"
-        chmod +x "$HOME/winebox/bin/wine" "$HOME/winebox/bin/wine64" "$HOME/winebox/bin/winepath"
+        chmod +x "$HOME/winebox/bin/wine" "$HOME/winebox/bin/winepath"
 
         echo "$HOME/winebox/bin" >> "$GITHUB_PATH"
         echo "$RUNNER_TEMP/wine-11.13-amd64-wow64/bin" >> "$GITHUB_PATH"
