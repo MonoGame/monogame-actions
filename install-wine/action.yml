@@ -9,7 +9,7 @@ runs:
       run: |
         brew upgrade
         brew install libpng libjpeg libtiff
-        brew install --cask xquartz wine-stable
+        brew install --cask xquartz
         xattr -dr com.apple.quarantine "/Applications/Wine Stable.app"
       shell: bash
     - name: Get Ubuntu version
