@@ -10,7 +10,12 @@ runs:
         brew upgrade
         brew install libpng libjpeg libtiff
         brew install --cask xquartz
-        xattr -dr com.apple.quarantine "/Applications/Wine Stable.app"
+        WINE_DIR="$GITHUB_WORKSPACE/.tools/wine-stable"
+        mkdir -p "$WINE_DIR"
+        curl https://dl.winehq.org/wine-builds/macosx/pool/portable-winehq-stable-5.0-osx64.tar.gz wine-stable.tar.gz --output wine-stable.tar.gz
+        tar -xzvf wine-stable.tar.gz -C "$WINE_DIR"
+        xattr -dr com.apple.quarantine "$WINE_DIR/usr"
+        echo "$WINE_DIR/usr/bin" >> "$GITHUB_PATH"
       shell: bash
     - name: Get Ubuntu version
       if: runner.os == 'Linux' 
