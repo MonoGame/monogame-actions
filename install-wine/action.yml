@@ -15,8 +15,8 @@ runs:
         mkdir -p "$WINE_DIR"
         curl --fail --location --output "$RUNNER_TEMP/wine-stable.tar.gz" "https://github.com/Gcenx/macOS_Wine_builds/releases/download/${WINE_VERSION}/wine-stable-${WINE_VERSION}-osx64.tar.xz"
         tar -xzvf "$RUNNER_TEMP/wine-stable.tar.gz" -C "$WINE_DIR"
-        xattr -dr com.apple.quarantine "$WINE_DIR/usr"
-        echo "$WINE_DIR/usr/bin" >> "$GITHUB_PATH"
+        xattr -dr com.apple.quarantine "$WINE_DIR/Wine Stable.app"
+        echo "$WINE_DIR/Wine Stable.app/Contents/Resources/wine/bin" >> "$GITHUB_PATH"
       shell: bash
     - name: Get Ubuntu version
       if: runner.os == 'Linux' 
