@@ -10,9 +10,10 @@ runs:
         brew upgrade
         brew install libpng libjpeg libtiff
         brew install --cask xquartz
+        WINE_VERSION="11.0_1"
         WINE_DIR="$GITHUB_WORKSPACE/.tools/wine-stable"
         mkdir -p "$WINE_DIR"
-        curl --fail --location --output "$RUNNER_TEMP/wine-stable.tar.gz" https://dl.winehq.org/wine-builds/macosx/pool/portable-winehq-stable-5.0-osx64.tar.gz
+        curl --fail --location --output "$RUNNER_TEMP/wine-stable.tar.gz" "https://github.com/Gcenx/macOS_Wine_builds/releases/download/${WINE_VERSION}/wine-stable-${WINE_VERSION}-osx64.tar.xz"
         tar -xzvf "$RUNNER_TEMP/wine-stable.tar.gz" -C "$WINE_DIR"
         xattr -dr com.apple.quarantine "$WINE_DIR/usr"
         echo "$WINE_DIR/usr/bin" >> "$GITHUB_PATH"
