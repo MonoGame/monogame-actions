@@ -59,12 +59,7 @@ runs:
         sudo apt clean
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt update
-        sudo apt install -y --no-install-recommends build-essential cmake curl git p7zip-full xvfb libsdl2-2.0-0
-
-        git clone --depth 1 --branch v0.4.2 https://github.com/ptitSeb/box64.git "$RUNNER_TEMP/box64"
-        cmake -S "$RUNNER_TEMP/box64" -B "$RUNNER_TEMP/box64/build" -D ARM_DYNAREC=ON -D CMAKE_BUILD_TYPE=RelWithDebInfo
-        cmake --build "$RUNNER_TEMP/box64/build" --parallel 2
-        sudo cmake --install "$RUNNER_TEMP/box64/build"
+        sudo apt install -y --no-install-recommends build-essential cmake curl git p7zip-full xvfb libsdl2-2.0-0 box64
 
         curl -L https://github.com/Kron4ek/Wine-Builds/releases/download/11.13/wine-11.13-amd64-wow64.tar.xz -o "$RUNNER_TEMP/wine-11.13-amd64-wow64.tar.xz"
         tar -xf "$RUNNER_TEMP/wine-11.13-amd64-wow64.tar.xz" -C "$RUNNER_TEMP"
