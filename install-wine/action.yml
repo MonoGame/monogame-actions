@@ -31,7 +31,9 @@ runs:
       if: runner.os == 'Linux'
       run: |
         source /etc/os-release
-        if [ "$VERSION_ID" = "24.04" ]; then
+        if [ "$VERSION_ID" = "26.04"]; then
+          echo "winesource=resolute" >> "$GITHUB_OUTPUT"
+        elif [ "$VERSION_ID" = "24.04" ]; then
           echo "winesource=noble" >> "$GITHUB_OUTPUT"
         else
           echo "winesource=jammy" >> "$GITHUB_OUTPUT"
@@ -44,10 +46,10 @@ runs:
         sudo apt clean
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt update
-        sudo apt install p7zip-full curl
+        sudo apt install p7zip-full curl gnupg
         sudo dpkg --add-architecture i386
         sudo mkdir -pm755 /etc/apt/keyrings
-        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+        wget -O - https://dl.winehq.org/wine-builds/winehq.key | sudo apt-key add -
         sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/${{ steps.osversion.outputs.winesource }}/winehq-${{ steps.osversion.outputs.winesource }}.sources
         sudo apt update
         sudo apt-cache policy winehq-stable
@@ -59,7 +61,7 @@ runs:
         sudo apt clean
         sudo rm -rf /var/lib/apt/lists/*
         sudo apt update
-        sudo apt install -y --no-install-recommends build-essential cmake curl git p7zip-full xvfb libsdl2-2.0-0
+        sudo apt install -y --no-install-recommends build-essential cmake curl git p7zip-full xvfb libsdl2-2.0-0 gnupg
 
         git clone --depth 1 --branch v0.4.2 https://github.com/ptitSeb/box64.git "$RUNNER_TEMP/box64"
         cmake -S "$RUNNER_TEMP/box64" -B "$RUNNER_TEMP/box64/build" -D ARM_DYNAREC=ON -D CMAKE_BUILD_TYPE=RelWithDebInfo
