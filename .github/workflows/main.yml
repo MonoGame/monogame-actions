@@ -17,6 +17,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - os: ubuntu-26.04
+            channel: linux
           - os: ubuntu-24.04
             channel: linux
           - os: ubuntu-22.04-arm
