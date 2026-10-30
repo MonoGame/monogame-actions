@@ -31,7 +31,7 @@ runs:
       if: runner.os == 'Linux'
       run: |
         source /etc/os-release
-        if [ "$VERSION_ID" = "26.04"]; then
+        if [ "$VERSION_ID" = "26.04" ]; then
           echo "winesource=resolute" >> "$GITHUB_OUTPUT"
         elif [ "$VERSION_ID" = "24.04" ]; then
           echo "winesource=noble" >> "$GITHUB_OUTPUT"
